@@ -50,7 +50,10 @@ class Builder
 
 	/**
 	 * @param mixed $object
-	 * @param array $params Accessed as {"attr": "key"} to access $params['attr']['key']
+	 * @param array $params Array of arrays!
+	 * 	Accessed as {"attr": "key"} to access $params['attr']['key']
+	 * 	From second level onwards the array is flattenned and keys
+	 * 	concatenated by '.' (eg $params['attr']['nested.key'])
 	 * @return mixed
 	 */
 	protected function buildFunction($object, array $params = [])
