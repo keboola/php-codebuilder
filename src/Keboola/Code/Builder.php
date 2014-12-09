@@ -1,0 +1,125 @@
+<?php
+/**
+ * Created by Ondrej Vana <kachna@keboola.com>
+ * Date: 09/12/14
+ */
+
+namespace Keboola\Code;
+
+use	Keboola\Code\Exception\UserScriptException;
+use Keboola\Utils\Utils;
+
+class Builder
+{
+	/**
+	 * @var array
+	 */
+	protected $allovedFns;
+
+	public function __construct(
+		array $allowedFns = [
+			"md5",
+			"sha1",
+			"time",
+			"date",
+			"strtotime",
+			"base64_encode",
+			"hash_hmac",
+			"sprintf",
+			"concat",
+			"implode"
+		]
+	) {
+		$this->allovedFns = $allowedFns;
+	}
+
+	/**
+	 * @param \stdClass $object
+	 * @param array $attrs accessed as {"attr": "key"}
+	 * @param array $params accessed as {"param": "key"}
+	 * @return mixed
+	 */
+	public function run(\stdClass $object, array $params = [])
+	{
+		// Flatten $params from 2nd level onwards
+		array_walk($params, function(&$value) {
+			$value = Utils::flattenArray($value);
+		});
+		return $this->buildFunction($object, $params);
+	}
+
+	/**
+	 * @param mixed $object
+	 * @param array $params Accessed as {"attr": "key"} to access $params['attr']['key']
+	 * @return mixed
+	 */
+	protected function buildFunction($object, array $params = [])
+	{
+		if (!is_object($object)) {
+			return $object;
+		} elseif (property_exists($object, 'function')) {
+			if (!in_array($object->function, $this->allovedFns)) {
+				$func = is_scalar($object->function) ? $object->function : json_encode($object->function);
+				throw new UserScriptException("Illegal function '{$func}'!");
+			}
+
+			$args = [];
+			if (property_exists($object, 'args')) {
+				foreach($object->args as $k => $v) {
+					$args[] = $this->buildFunction($v, $params);
+				}
+			}
+
+			if (!function_exists($object->function)) {
+				return $this->customFunction($object->function, $args);
+			} else {
+				return call_user_func_array($object->function, $args);
+			}
+// 		} elseif (property_exists($object, 'attr')) {
+// 			if (empty($attrs[$object->attr])) {
+// 				throw new UserScriptException("Error evaluating user function - attribute '{$object->attr}' not found!");
+// 			}
+//
+// 			return $attrs[$object->attr];
+// 		} elseif (property_exists($object, 'param')) {
+// 			if (empty($params[$object->param])) {
+// 				throw new UserScriptException("Error evaluating user function - parameter '{$object->param}' not found!");
+// 			}
+//
+// 			return $params[$object->param];
+		} elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
+// } elseif (count($object) == 1) {
+// var_dump(key($object), reset($object), array_key_exists(key($object), $params), $params);
+			if (empty($params[key($object)][reset($object)])) {
+				throw new UserScriptException("Error evaluating user function - " . key($object) . " '{$object->attr}' not found!");
+			}
+			return $params[key($object)][reset($object)];
+		} else {
+			return $object;
+		}
+	}
+
+	/**
+	 * @param string $fn
+	 * @param array $args
+	 * @return mixed
+	 */
+	protected function customFunction($fn, $args)
+	{
+		if (method_exists($this, $fn)) {
+			return $this->{$fn}($args);
+		} else {
+			throw new \Exception("Attempted to call undefined method {$fn}.", 500);
+		}
+	}
+
+	/**
+	 * Concatenate multiple strings into one
+	 * @param array $args
+	 * @return string
+	 */
+	protected function concat(array $args)
+	{
+		return implode('', $args);
+	}
+}

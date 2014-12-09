@@ -1,0 +1,23 @@
+{
+    "name": "keboola/codebuilder",
+    "description": "Execute JSON defined user scripts",
+    "license": "MIT",
+	"keywords": ["user-script", "script", "user"],
+    "authors": [
+        {
+            "name": "Ondrej Vana",
+            "email": "kachna@keboola.cz"
+        }
+    ],
+    "require": {
+		"keboola/php-utils": "~0.1.10"
+    },
+	"require-dev": {
+		"phpunit/phpunit": "3.7.*"
+	},
+	"autoload": {
+		"psr-0": {
+			"Keboola\\Code": "src/"
+		}
+	}
+}
