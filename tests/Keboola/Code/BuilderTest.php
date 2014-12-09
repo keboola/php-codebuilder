@@ -179,4 +179,35 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 			"args": []
 		}'));
 	}
+
+	public function testAllowFunction()
+	{
+		$builder = new Builder();
+		$builder->allowFunction('gettype')->allowFunction('intval');
+		$val = $builder->run(json_decode('{
+			"function": "gettype",
+			"args": [{
+				"function": "intval",
+				"args": [{
+					"function": "concat",
+					"args": ["12",34]
+				}]
+			}]
+		}'));
+		$this->assertEquals($val, 'integer');
+	}
+
+	/**
+	 * @expectedException \Keboola\Code\Exception\UserScriptException
+	 * @expectedExceptionMessage Illegal function 'md5'!
+	 */
+	public function testDenyFunction()
+	{
+		$builder = new Builder();
+		$builder->denyFunction('md5')->denyFunction('thisDoesntExist');
+		$builder->run(json_decode('{
+			"function": "md5",
+			"args": ["test"]
+		}'));
+	}
 }

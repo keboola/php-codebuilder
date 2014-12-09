@@ -38,6 +38,7 @@ class Builder
 	 * @param array $attrs accessed as {"attr": "key"}
 	 * @param array $params accessed as {"param": "key"}
 	 * @return mixed
+	 * @api
 	 */
 	public function run(\stdClass $object, array $params = [])
 	{
@@ -110,5 +111,29 @@ class Builder
 	protected function concat(array $args)
 	{
 		return implode('', $args);
+	}
+
+	/**
+	 * @param string $function
+	 * @return Builder
+	 */
+	public function allowFunction($function)
+	{
+		if (!in_array($function, $this->allovedFns)) {
+			$this->allovedFns[] = $function;
+		}
+		return $this;
+	}
+
+	/**
+	 * @param string $function
+	 * @return Builder
+	 */
+	public function denyFunction($function)
+	{
+		foreach (array_keys($this->allovedFns, $function) as $key) {
+			unset($this->allovedFns[$key]);
+		}
+		return $this;
 	}
 }
