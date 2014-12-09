@@ -75,21 +75,7 @@ class Builder
 			} else {
 				return call_user_func_array($object->function, $args);
 			}
-// 		} elseif (property_exists($object, 'attr')) {
-// 			if (empty($attrs[$object->attr])) {
-// 				throw new UserScriptException("Error evaluating user function - attribute '{$object->attr}' not found!");
-// 			}
-//
-// 			return $attrs[$object->attr];
-// 		} elseif (property_exists($object, 'param')) {
-// 			if (empty($params[$object->param])) {
-// 				throw new UserScriptException("Error evaluating user function - parameter '{$object->param}' not found!");
-// 			}
-//
-// 			return $params[$object->param];
 		} elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
-// } elseif (count($object) == 1) {
-// var_dump(key($object), reset($object), array_key_exists(key($object), $params), $params);
 			if (empty($params[key($object)][reset($object)])) {
 				throw new UserScriptException("Error evaluating user function - " . key($object) . " '{$object->attr}' not found!");
 			}

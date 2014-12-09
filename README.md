@@ -46,6 +46,10 @@ The function must be specified in a JSON format, which may contain one of the fo
             ]
         }
         ```
+- **A key from the parameters array**:
+	- `{ "attr": "attributeName" }` for $params['attr']['attributeName']
+	- or `{ "param": "nested.attribute.name" }` for $params['param']['nested']['attribute']['name']
+	- The *first* level is always used as the key to determine the "type"
 
 
 
