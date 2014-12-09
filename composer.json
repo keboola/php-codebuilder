@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-		"keboola/php-utils": "~0.1.10"
+		"keboola/php-utils": "~0.1.10",
+		"php": ">=5.4.0"
     },
 	"require-dev": {
 		"phpunit/phpunit": "3.7.*"
