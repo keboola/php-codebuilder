@@ -153,6 +153,18 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 
 	/**
 	 * @expectedException \Keboola\Code\Exception\UserScriptException
+	 * @expectedExceptionMessage Error evaluating user function - data 'a' not found!
+	 */
+	public function testParamsNotFoundType()
+	{
+		$builder = new Builder();
+		$def = '{"data": "a"}';
+
+		var_dump($builder->run(json_decode($def), ['data' => []]));
+	}
+
+	/**
+	 * @expectedException \Keboola\Code\Exception\UserScriptException
 	 * @expectedExceptionMessage Illegal function 'var_dump'!
 	 */
 	public function testCheckConfigFail()

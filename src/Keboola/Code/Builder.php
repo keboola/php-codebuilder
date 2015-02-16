@@ -35,8 +35,10 @@ class Builder
 
 	/**
 	 * @param \stdClass $object
-	 * @param array $attrs accessed as {"attr": "key"}
-	 * @param array $params accessed as {"param": "key"}
+	 * @param array $params Array of arrays!
+	 * 	Accessed as {"attr": "key"} to access $params['attr']['key']
+	 * 	From second level onwards the array is flattenned and keys
+	 * 	concatenated by '.' (eg $params['attr']['nested.key'])
 	 * @return mixed
 	 * @api
 	 */
@@ -81,7 +83,7 @@ class Builder
 			}
 		} elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
 			if (empty($params[key($object)][reset($object)])) {
-				throw new UserScriptException("Error evaluating user function - " . key($object) . " '{$object->attr}' not found!");
+				throw new UserScriptException(sprintf("Error evaluating user function - %s '%s' not found!", key($object), reset($object)));
 			}
 			return $params[key($object)][reset($object)];
 		} else {
