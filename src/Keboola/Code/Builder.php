@@ -82,7 +82,7 @@ class Builder
 				return call_user_func_array($object->function, $args);
 			}
 		} elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
-			if (empty($params[key($object)][reset($object)])) {
+			if (!isset($params[key($object)][reset($object)])) {
 				throw new UserScriptException(sprintf("Error evaluating user function - %s '%s' not found!", key($object), reset($object)));
 			}
 			return $params[key($object)][reset($object)];
