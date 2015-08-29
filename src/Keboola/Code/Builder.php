@@ -46,6 +46,10 @@ class Builder
 	{
 		// Flatten $params from 2nd level onwards
 		array_walk($params, function(&$value) {
+			if(!is_array($value))
+			{
+				throw new UserScriptException("The params for code builder must be an array of arrays!");
+			}
 			$value = Utils::flattenArray($value);
 		});
 		return $this->buildFunction($object, $params);
