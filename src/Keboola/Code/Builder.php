@@ -48,7 +48,7 @@ class Builder
 		array_walk($params, function(&$value) {
 			if(!is_array($value))
 			{
-				throw new UserScriptException("The params for code builder must be an array of arrays!");
+				throw new \Exception("The params for code builder must be an array of arrays!");
 			}
 			$value = Utils::flattenArray($value);
 		});
@@ -80,10 +80,15 @@ class Builder
 				}
 			}
 
-			if (!function_exists($object->function)) {
-				return $this->customFunction($object->function, $args);
-			} else {
-				return call_user_func_array($object->function, $args);
+			try {
+				if (!function_exists($object->function)) {
+					return $this->customFunction($object->function, $args);
+				} else {
+					return call_user_func_array($object->function, $args);
+				}
+			} catch(\ErrorException $e) {
+				// Error handler must be set for this to work properly
+				throw new UserScriptException($e->getMessage());
 			}
 		} elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
 			if (!isset($params[key($object)][reset($object)])) {
