@@ -39,7 +39,7 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 			]
 		}';
 
-		$this->assertEquals(
+		self::assertEquals(
 			$builder->run(
 				json_decode($definition),
 				$params
@@ -64,7 +64,7 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 			]
 		}';
 
-		$this->assertEquals(
+		self::assertEquals(
 			$builder->run(
 				json_decode($def2),
 				$params
@@ -84,7 +84,7 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 			]
 		}';
 
-		$this->assertEquals(
+		self::assertEquals(
 			$builder->run(
 				json_decode($def3),
 				['attr' => ['job' => [1 => ['success' => "2014-12-08T10:38:35+01:00"]]]]
@@ -92,7 +92,7 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 			date('Y-m-d+H:i', strtotime("2014-12-08T10:38:35+01:00"))
 		);
 
-		$this->assertEquals(
+		self::assertEquals(
 			$builder->run(
 				json_decode('{
 					"function": "implode",
@@ -118,7 +118,7 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 			]
 		}';
 
-		$this->assertEquals(
+		self::assertEquals(
 			$builder->run(
 				json_decode($def),
 				[
@@ -206,7 +206,7 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 				}]
 			}]
 		}'));
-		$this->assertEquals($val, 'integer');
+		self::assertEquals($val, 'integer');
 	}
 
 	/**
@@ -221,5 +221,36 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
 			"function": "md5",
 			"args": ["test"]
 		}'));
+	}
+
+	public function testArrayArgument()
+	{
+        $builder = new Builder();
+        $def = json_decode('{
+            "function": "implode",
+            "args": [
+                "\n",
+                [
+                    {
+                        "authorization": "timestamp"
+                    },
+                    {
+                        "request": "method"
+                    },
+                    "\n"
+                ]
+            ]
+        }');
+
+        $result = $builder->run($def, [
+            'authorization' => [
+                'timestamp' => 123
+            ],
+            'request' => [
+                'method' => 'GET'
+            ]
+        ]);
+        self::assertEquals("123\nGET\n\n", $result);
+
 	}
 }

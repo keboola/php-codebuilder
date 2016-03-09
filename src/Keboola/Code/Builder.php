@@ -65,7 +65,14 @@ class Builder
 	 */
 	protected function buildFunction($object, array $params = [])
 	{
-		if (!is_object($object)) {
+        if (is_array($object)) {
+            $array = [];
+            foreach($object as $k => $v) {
+                $array[$k] = $this->buildFunction($v, $params);
+            }
+
+            return $array;
+        } elseif (!is_object($object)) {
 			return $object;
 		} elseif (property_exists($object, 'function')) {
 			if (!in_array($object->function, $this->allovedFns)) {
