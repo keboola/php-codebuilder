@@ -14,6 +14,7 @@ Execute user scripts defined in a JSON
 - `hash_hmac`: [See PHP documentation](http://php.net/manual/en/function.hash-hmac.php)
 - `sprintf`: [See PHP documentation](http://php.net/manual/en/function.sprintf.php)
 - `concat`: Concatenate its arguments into a single string
+- `ifempty`: Return first argument if is not empty, otherwise return second argument
 - `implode`: Concatenate an array from the second argument, using glue string from the first arg
 
 ## Syntax
