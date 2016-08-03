@@ -4,6 +4,93 @@ use Keboola\Code\Builder;
 
 class BuilderTest extends \PHPUnit_Framework_TestCase
 {
+	public function testIfEmpty()
+	{
+		$now = new \DateTime();
+
+		$previousMonth = clone $now;
+		$previousMonth->modify('-30 days');
+
+		$builder = new Builder();
+
+		// second argument
+		$params = ['time' =>
+			[
+				'previousStart' => 0,
+			]
+		];
+
+		$definition =
+			'{
+			"function": "ifempty",
+			"args": [
+				{
+					"time": "previousStart"
+				},
+				{
+					"function": "strtotime",
+					"args": [
+						"-30 days",
+						' . $now->getTimestamp() . '
+					]
+				}
+			]
+		}';
+
+		self::assertEquals(
+			$builder->run(
+				json_decode($definition),
+				$params
+			),
+			$previousMonth->getTimestamp()
+		);
+
+		// first argument
+		$params = ['time' =>
+			[
+				'previousStart' => $now->getTimestamp(),
+			]
+		];
+
+		self::assertEquals(
+			$builder->run(
+				json_decode($definition),
+				$params
+			),
+			$now->getTimestamp()
+		);
+
+		// bad argument count
+		$definition =
+			'{
+			"function": "ifempty",
+			"args": [
+				{
+					"time": "previousStart"
+				},
+				{
+					"function": "strtotime",
+					"args": [
+						"-30 days",
+						' . $now->getTimestamp() . '
+					]
+				},
+				"third argument"
+			]
+		}';
+
+		try {
+			$builder->run(
+				json_decode($definition),
+				$params
+			);
+
+			self::fail("Build of ifempty function should produce error");
+		} catch (\Keboola\Code\Exception\UserScriptException $e) {
+
+		}
+	}
+
 	public function testEval()
 	{
 		$builder = new Builder();

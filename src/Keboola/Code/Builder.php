@@ -27,6 +27,7 @@ class Builder
 			"hash_hmac",
 			"sprintf",
 			"concat",
+			"ifempty",
 			"implode"
 		]
 	) {
@@ -129,6 +130,21 @@ class Builder
 	protected function concat(array $args)
 	{
 		return implode('', $args);
+	}
+
+	/**
+	 * Return first argument if is not empty, otherwise return second argument
+	 * @param array $args
+	 * @return mixed
+	 * @throws UserScriptException
+	 */
+	protected function ifempty(array $args)
+	{
+		if (count($args) !== 2) {
+			throw new UserScriptException("Bad argument count for function 'ifempty'!");
+		}
+
+		return empty($args[0]) ? $args[1] : $args[0];
 	}
 
 	/**
