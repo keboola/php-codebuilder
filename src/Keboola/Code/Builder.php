@@ -67,6 +67,7 @@ class Builder
 	protected function buildFunction($object, array $params = [])
 	{
         if (is_array($object)) {
+	    // this is used when function arguments are array - e.g. implode function
             $array = [];
             foreach($object as $k => $v) {
                 $array[$k] = $this->buildFunction($v, $params);
