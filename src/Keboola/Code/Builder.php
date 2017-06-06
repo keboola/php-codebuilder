@@ -7,7 +7,6 @@
 namespace Keboola\Code;
 
 use	Keboola\Code\Exception\UserScriptException;
-use Keboola\Utils\Utils;
 
 class Builder
 {
@@ -51,7 +50,7 @@ class Builder
 			{
 				throw new \Exception("The params for code builder must be an array of arrays!");
 			}
-			$value = Utils::flattenArray($value);
+			$value = \Keboola\Utils\flattenArray($value);
 		});
 		return $this->buildFunction($object, $params);
 	}
