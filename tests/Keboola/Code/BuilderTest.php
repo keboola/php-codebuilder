@@ -231,7 +231,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException UserScriptException
+     * @expectedException \Keboola\Code\Exception\UserScriptException
      * @expectedExceptionMessage Error evaluating user function - attr 'a' not found!
      */
     public function testParamsNotFound()
@@ -243,7 +243,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException UserScriptException
+     * @expectedException \Keboola\Code\Exception\UserScriptException
      * @expectedExceptionMessage Error evaluating user function - data 'a' not found!
      */
     public function testParamsNotFoundType()
@@ -255,7 +255,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException UserScriptException
+     * @expectedException \Keboola\Code\Exception\UserScriptException
      * @expectedExceptionMessage Illegal function 'var_dump'!
      */
     public function testCheckConfigFail()
@@ -268,7 +268,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException UserScriptException
+     * @expectedException \Keboola\Code\Exception\UserScriptException
      * @expectedExceptionMessage Illegal function '{"function":"concat","args":["di","e"]}'!
      */
     public function testCheckConfigObfuscate()
@@ -301,7 +301,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException UserScriptException
+     * @expectedException \Keboola\Code\Exception\UserScriptException
      * @expectedExceptionMessage Illegal function 'md5'!
      */
     public function testDenyFunction()
