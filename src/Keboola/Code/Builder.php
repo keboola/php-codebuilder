@@ -9,7 +9,7 @@ class Builder
     /**
      * @var array
      */
-    protected $allovedFns;
+    protected $allowedFns;
 
     public function __construct(
         array $allowedFns = [
@@ -26,7 +26,7 @@ class Builder
             "implode"
         ]
     ) {
-        $this->allovedFns = $allowedFns;
+        $this->allowedFns = $allowedFns;
     }
 
     /**
@@ -72,7 +72,7 @@ class Builder
         } elseif (!is_object($object)) {
             return $object;
         } elseif (property_exists($object, 'function')) {
-            if (!in_array($object->function, $this->allovedFns)) {
+            if (!in_array($object->function, $this->allowedFns)) {
                 $func = is_scalar($object->function) ? $object->function : json_encode($object->function);
                 throw new UserScriptException("Illegal function '{$func}'!");
             }
@@ -152,8 +152,8 @@ class Builder
      */
     public function allowFunction($function)
     {
-        if (!in_array($function, $this->allovedFns)) {
-            $this->allovedFns[] = $function;
+        if (!in_array($function, $this->allowedFns)) {
+            $this->allowedFns[] = $function;
         }
         return $this;
     }
@@ -164,8 +164,8 @@ class Builder
      */
     public function denyFunction($function)
     {
-        foreach (array_keys($this->allovedFns, $function) as $key) {
-            unset($this->allovedFns[$key]);
+        foreach (array_keys($this->allowedFns, $function) as $key) {
+            unset($this->allowedFns[$key]);
         }
         return $this;
     }
