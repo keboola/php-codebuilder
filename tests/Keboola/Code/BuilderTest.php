@@ -95,6 +95,23 @@ class BuilderTest extends TestCase
         }
     }
 
+    public function testInvalidParams()
+    {
+        $builder = new Builder();
+        $definition =
+            '{
+            "function": "date",
+            "args": []
+        }';
+
+        try {
+            $builder->run(json_decode($definition));
+            self::fail('Invalid parameters must cause exception');
+        } catch (UserScriptException $e) {
+            self::assertContains('date() expects at least 1 parameter, 0 given', $e->getMessage());
+        }
+    }
+
     public function testEval()
     {
         $builder = new Builder();

@@ -90,8 +90,7 @@ class Builder
                 } else {
                     return call_user_func_array($object->function, $args);
                 }
-            } catch (\ErrorException $e) {
-                // Error handler must be set for this to work properly
+            } catch (\Throwable $e) {
                 throw new UserScriptException($e->getMessage());
             }
         } elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
