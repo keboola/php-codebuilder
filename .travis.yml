@@ -5,6 +5,6 @@ before_script:
   - composer install
 script:
   - php ./vendor/bin/phpcs --standard=psr2 --ignore=vendor -n .  
-  - php ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+  - php ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml --whitelist=vendor/
 after_success:
   - ./vendor/bin/test-reporter
