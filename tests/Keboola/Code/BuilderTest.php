@@ -1,5 +1,7 @@
 <?php
 
+namespace Keboola\Code\Tests;
+
 use Keboola\Code\Builder;
 use PHPUnit\Framework\TestCase;
 
