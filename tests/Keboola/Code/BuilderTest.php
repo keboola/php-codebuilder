@@ -1,8 +1,9 @@
 <?php
 
 use Keboola\Code\Builder;
+use PHPUnit\Framework\TestCase;
 
-class BuilderTest extends \PHPUnit_Framework_TestCase
+class BuilderTest extends TestCase
 {
     public function testIfEmpty()
     {
