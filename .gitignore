@@ -1,9 +1,5 @@
 .git
-vendor
-.kdev4
-*.kdev4
-*~
 .idea
-parameters.yml
-composer.phar
+vendor
 composer.lock
+/build/logs

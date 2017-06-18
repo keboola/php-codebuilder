@@ -1,317 +1,338 @@
 <?php
 
+namespace Keboola\Code\Tests;
+
 use Keboola\Code\Builder;
+use Keboola\Code\Exception\UserScriptException;
+use PHPUnit\Framework\TestCase;
 
-class BuilderTest extends \PHPUnit_Framework_TestCase
+class BuilderTest extends TestCase
 {
-	public function testIfEmpty()
-	{
-		$now = new \DateTime();
+    public function testIfEmpty()
+    {
+        $now = new \DateTime();
 
-		$previousMonth = clone $now;
-		$previousMonth->modify('-30 days');
+        $previousMonth = clone $now;
+        $previousMonth->modify('-30 days');
 
-		$builder = new Builder();
+        $builder = new Builder();
 
-		// second argument
-		$params = ['time' =>
-			[
-				'previousStart' => 0,
-			]
-		];
+        // second argument
+        $params = ['time' =>
+            [
+                'previousStart' => 0,
+            ]
+        ];
 
-		$definition =
-			'{
-			"function": "ifempty",
-			"args": [
-				{
-					"time": "previousStart"
-				},
-				{
-					"function": "strtotime",
-					"args": [
-						"-30 days",
-						' . $now->getTimestamp() . '
-					]
-				}
-			]
-		}';
+        $definition =
+            '{
+            "function": "ifempty",
+            "args": [
+                {
+                    "time": "previousStart"
+                },
+                {
+                    "function": "strtotime",
+                    "args": [
+                        "-30 days",
+                        ' . $now->getTimestamp() . '
+                    ]
+                }
+            ]
+        }';
 
-		self::assertEquals(
-			$builder->run(
-				json_decode($definition),
-				$params
-			),
-			$previousMonth->getTimestamp()
-		);
+        self::assertEquals(
+            $builder->run(
+                json_decode($definition),
+                $params
+            ),
+            $previousMonth->getTimestamp()
+        );
 
-		// first argument
-		$params = ['time' =>
-			[
-				'previousStart' => $now->getTimestamp(),
-			]
-		];
+        // first argument
+        $params = ['time' =>
+            [
+                'previousStart' => $now->getTimestamp(),
+            ]
+        ];
 
-		self::assertEquals(
-			$builder->run(
-				json_decode($definition),
-				$params
-			),
-			$now->getTimestamp()
-		);
+        self::assertEquals(
+            $builder->run(
+                json_decode($definition),
+                $params
+            ),
+            $now->getTimestamp()
+        );
 
-		// bad argument count
-		$definition =
-			'{
-			"function": "ifempty",
-			"args": [
-				{
-					"time": "previousStart"
-				},
-				{
-					"function": "strtotime",
-					"args": [
-						"-30 days",
-						' . $now->getTimestamp() . '
-					]
-				},
-				"third argument"
-			]
-		}';
+        // bad argument count
+        $definition =
+            '{
+            "function": "ifempty",
+            "args": [
+                {
+                    "time": "previousStart"
+                },
+                {
+                    "function": "strtotime",
+                    "args": [
+                        "-30 days",
+                        ' . $now->getTimestamp() . '
+                    ]
+                },
+                "third argument"
+            ]
+        }';
 
-		try {
-			$builder->run(
-				json_decode($definition),
-				$params
-			);
+        try {
+            $builder->run(
+                json_decode($definition),
+                $params
+            );
 
-			self::fail("Build of ifempty function should produce error");
-		} catch (\Keboola\Code\Exception\UserScriptException $e) {
+            self::fail("Build of ifempty function should produce error");
+        } catch (UserScriptException $e) {
+            self::assertContains('Bad argument count for function \'ifempty\'!', $e->getMessage());
+        }
+    }
 
-		}
-	}
+    public function testInvalidParams()
+    {
+        $builder = new Builder();
+        $definition =
+            '{
+            "function": "date",
+            "args": []
+        }';
 
-	public function testEval()
-	{
-		$builder = new Builder();
-		$params = ['attr' =>
-			[
-				'apiKey' => "someApiKey",
-				'test' => [
-					'secret' => "oh I'm Soooo Secret Look at meee"
-				]
-			]
-		];
+        try {
+            $builder->run(json_decode($definition));
+            self::fail('Invalid parameters must cause exception');
+        } catch (UserScriptException $e) {
+            self::assertContains('date() expects at least 1 parameter, 0 given', $e->getMessage());
+        }
+    }
 
-		// md5(attr[apiKey] . attr[test.secret] . time())
-		$definition =
-		'{
-			"function": "md5",
-			"args": [
-				{
-					"function": "concat",
-					"args": [
-						{
-							"attr": "apiKey"
-						},
-						{
-							"attr": "test.secret"
-						},
-						{
-							"function": "time"
-						},
-						"string"
-					]
-				}
-			]
-		}';
+    public function testEval()
+    {
+        $builder = new Builder();
+        $params = ['attr' =>
+            [
+                'apiKey' => "someApiKey",
+                'test' => [
+                    'secret' => "oh I'm Soooo Secret Look at meee"
+                ]
+            ]
+        ];
 
-		self::assertEquals(
-			$builder->run(
-				json_decode($definition),
-				$params
-			),
-			md5($params['attr']['apiKey'] . $params['attr']['test']['secret'] . time() . "string")
-		);
+        // md5(attr[apiKey] . attr[test.secret] . time())
+        $definition =
+            '{
+            "function": "md5",
+            "args": [
+                {
+                    "function": "concat",
+                    "args": [
+                        {
+                            "attr": "apiKey"
+                        },
+                        {
+                            "attr": "test.secret"
+                        },
+                        {
+                            "function": "time"
+                        },
+                        "string"
+                    ]
+                }
+            ]
+        }';
 
-		$def2 =
-		'{
-			"function": "concat",
-			"args": [
-				{
-					"attr": "apiKey"
-				},
-				{
-					"attr": "test.secret"
-				},
-				{
-					"function": "time"
-				},
-				"string"
-			]
-		}';
+        self::assertEquals(
+            $builder->run(
+                json_decode($definition),
+                $params
+            ),
+            md5($params['attr']['apiKey'] . $params['attr']['test']['secret'] . time() . "string")
+        );
 
-		self::assertEquals(
-			$builder->run(
-				json_decode($def2),
-				$params
-			),
-			sprintf('%s%s%s%s', $params['attr']['apiKey'],  $params['attr']['test']['secret'],  time(),  "string")
-		);
+        $def2 =
+            '{
+            "function": "concat",
+            "args": [
+                {
+                    "attr": "apiKey"
+                },
+                {
+                    "attr": "test.secret"
+                },
+                {
+                    "function": "time"
+                },
+                "string"
+            ]
+        }';
 
-		//"%%date(\'Y-m-d+H:i\', strtotime(attr[job.1.success]))%%"
-		$def3 = '{
-			"function": "date",
-			"args": [
-				"Y-m-d+H:i",
-				{
-					"function": "strtotime",
-					"args": [{"attr": "job.1.success"}]
-				}
-			]
-		}';
+        self::assertEquals(
+            $builder->run(
+                json_decode($def2),
+                $params
+            ),
+            sprintf('%s%s%s%s', $params['attr']['apiKey'], $params['attr']['test']['secret'], time(), "string")
+        );
 
-		self::assertEquals(
-			$builder->run(
-				json_decode($def3),
-				['attr' => ['job' => [1 => ['success' => "2014-12-08T10:38:35+01:00"]]]]
-			),
-			date('Y-m-d+H:i', strtotime("2014-12-08T10:38:35+01:00"))
-		);
+        //"%%date(\'Y-m-d+H:i\', strtotime(attr[job.1.success]))%%"
+        $def3 = '{
+            "function": "date",
+            "args": [
+                "Y-m-d+H:i",
+                {
+                    "function": "strtotime",
+                    "args": [{"attr": "job.1.success"}]
+                }
+            ]
+        }';
 
-		self::assertEquals(
-			$builder->run(
-				json_decode('{
-					"function": "implode",
-					"args": [
-						".",
-						["st", "ri", "ng"]
-					]
-				}')
-			),
-			"st.ri.ng"
-		);
-	}
+        self::assertEquals(
+            $builder->run(
+                json_decode($def3),
+                ['attr' => ['job' => [1 => ['success' => "2014-12-08T10:38:35+01:00"]]]]
+            ),
+            date('Y-m-d+H:i', strtotime("2014-12-08T10:38:35+01:00"))
+        );
 
-	public function testParams()
-	{
-		$builder = new Builder();
-		$def = '{
-			"function": "concat",
-			"args": [
-				{"attr": "c"},
-				{"param": "a.b"},
-				{"attr": "a.b"}
-			]
-		}';
+        self::assertEquals(
+            $builder->run(
+                json_decode('{
+                    "function": "implode",
+                    "args": [
+                        ".",
+                        ["st", "ri", "ng"]
+                    ]
+                }')
+            ),
+            "st.ri.ng"
+        );
+    }
 
-		self::assertEquals(
-			$builder->run(
-				json_decode($def),
-				[
-					'attr' => [
-						'a' => [
-							'b' => "String"
-						],
-						'c' => "Woah"
-					],
-					'param' => [
-						'a' => [
-							'b' => "Another"
-						]
-					]
-				]
-			),
-			"WoahAnotherString"
-		);
-	}
+    public function testParams()
+    {
+        $builder = new Builder();
+        $def = '{
+            "function": "concat",
+            "args": [
+                {"attr": "c"},
+                {"param": "a.b"},
+                {"attr": "a.b"}
+            ]
+        }';
 
-	/**
-	 * @expectedException \Keboola\Code\Exception\UserScriptException
-	 * @expectedExceptionMessage Error evaluating user function - attr 'a' not found!
-	 */
-	public function testParamsNotFound()
-	{
-		$builder = new Builder();
-		$def = '{"attr": "a"}';
+        self::assertEquals(
+            $builder->run(
+                json_decode($def),
+                [
+                    'attr' => [
+                        'a' => [
+                            'b' => "String"
+                        ],
+                        'c' => "Woah"
+                    ],
+                    'param' => [
+                        'a' => [
+                            'b' => "Another"
+                        ]
+                    ]
+                ]
+            ),
+            "WoahAnotherString"
+        );
+    }
 
-		$builder->run(json_decode($def), ['attr' => []]);
-	}
+    /**
+     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedExceptionMessage Error evaluating user function - attr 'a' not found!
+     */
+    public function testParamsNotFound()
+    {
+        $builder = new Builder();
+        $def = '{"attr": "a"}';
 
-	/**
-	 * @expectedException \Keboola\Code\Exception\UserScriptException
-	 * @expectedExceptionMessage Error evaluating user function - data 'a' not found!
-	 */
-	public function testParamsNotFoundType()
-	{
-		$builder = new Builder();
-		$def = '{"data": "a"}';
+        $builder->run(json_decode($def), ['attr' => []]);
+    }
 
-		var_dump($builder->run(json_decode($def), ['data' => []]));
-	}
+    /**
+     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedExceptionMessage Error evaluating user function - data 'a' not found!
+     */
+    public function testParamsNotFoundType()
+    {
+        $builder = new Builder();
+        $def = '{"data": "a"}';
 
-	/**
-	 * @expectedException \Keboola\Code\Exception\UserScriptException
-	 * @expectedExceptionMessage Illegal function 'var_dump'!
-	 */
-	public function testCheckConfigFail()
-	{
-		$builder = new Builder();
-		$builder->run(json_decode('{
-			"function": "var_dump",
-			"args": []
-		}'));
-	}
+        var_dump($builder->run(json_decode($def), ['data' => []]));
+    }
 
-	/**
-	 * @expectedException \Keboola\Code\Exception\UserScriptException
-	 * @expectedExceptionMessage Illegal function '{"function":"concat","args":["di","e"]}'!
-	 */
-	public function testCheckConfigObfuscate()
-	{
-		$builder = new Builder();
-		$builder->run(json_decode('{
-			"function": {
-				"function": "concat",
-				"args": ["di", "e"]
-			},
-			"args": []
-		}'));
-	}
+    /**
+     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedExceptionMessage Illegal function 'var_dump'!
+     */
+    public function testCheckConfigFail()
+    {
+        $builder = new Builder();
+        $builder->run(json_decode('{
+            "function": "var_dump",
+            "args": []
+        }'));
+    }
 
-	public function testAllowFunction()
-	{
-		$builder = new Builder();
-		$builder->allowFunction('gettype')->allowFunction('intval');
-		$val = $builder->run(json_decode('{
-			"function": "gettype",
-			"args": [{
-				"function": "intval",
-				"args": [{
-					"function": "concat",
-					"args": ["12",34]
-				}]
-			}]
-		}'));
-		self::assertEquals($val, 'integer');
-	}
+    /**
+     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedExceptionMessage Illegal function '{"function":"concat","args":["di","e"]}'!
+     */
+    public function testCheckConfigObfuscate()
+    {
+        $builder = new Builder();
+        $builder->run(json_decode('{
+            "function": {
+                "function": "concat",
+                "args": ["di", "e"]
+            },
+            "args": []
+        }'));
+    }
 
-	/**
-	 * @expectedException \Keboola\Code\Exception\UserScriptException
-	 * @expectedExceptionMessage Illegal function 'md5'!
-	 */
-	public function testDenyFunction()
-	{
-		$builder = new Builder();
-		$builder->denyFunction('md5')->denyFunction('thisDoesntExist');
-		$builder->run(json_decode('{
-			"function": "md5",
-			"args": ["test"]
-		}'));
-	}
+    public function testAllowFunction()
+    {
+        $builder = new Builder();
+        $builder->allowFunction('gettype')->allowFunction('intval');
+        $val = $builder->run(json_decode('{
+            "function": "gettype",
+            "args": [{
+                "function": "intval",
+                "args": [{
+                    "function": "concat",
+                    "args": ["12",34]
+                }]
+            }]
+        }'));
+        self::assertEquals($val, 'integer');
+    }
 
-	public function testArrayArgument()
-	{
+    /**
+     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedExceptionMessage Illegal function 'md5'!
+     */
+    public function testDenyFunction()
+    {
+        $builder = new Builder();
+        $builder->denyFunction('md5')->denyFunction('thisDoesntExist');
+        $builder->run(json_decode('{
+            "function": "md5",
+            "args": ["test"]
+        }'));
+    }
+
+    public function testArrayArgument()
+    {
         $builder = new Builder();
         $def = json_decode('{
             "function": "implode",
@@ -338,6 +359,5 @@ class BuilderTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
         self::assertEquals("123\nGET\n\n", $result);
-
-	}
+    }
 }
