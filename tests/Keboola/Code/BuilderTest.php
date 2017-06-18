@@ -3,6 +3,7 @@
 namespace Keboola\Code\Tests;
 
 use Keboola\Code\Builder;
+use Keboola\Code\Exception\UserScriptException;
 use PHPUnit\Framework\TestCase;
 
 class BuilderTest extends TestCase
@@ -89,8 +90,8 @@ class BuilderTest extends TestCase
             );
 
             self::fail("Build of ifempty function should produce error");
-        } catch (\Keboola\Code\Exception\UserScriptException $e) {
-
+        } catch (UserScriptException $e) {
+            self::assertContains('Bad argument count for function \'ifempty\'!', $e->getMessage());
         }
     }
 
@@ -230,7 +231,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedException UserScriptException
      * @expectedExceptionMessage Error evaluating user function - attr 'a' not found!
      */
     public function testParamsNotFound()
@@ -242,7 +243,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedException UserScriptException
      * @expectedExceptionMessage Error evaluating user function - data 'a' not found!
      */
     public function testParamsNotFoundType()
@@ -254,7 +255,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedException UserScriptException
      * @expectedExceptionMessage Illegal function 'var_dump'!
      */
     public function testCheckConfigFail()
@@ -267,7 +268,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedException UserScriptException
      * @expectedExceptionMessage Illegal function '{"function":"concat","args":["di","e"]}'!
      */
     public function testCheckConfigObfuscate()
@@ -300,7 +301,7 @@ class BuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
+     * @expectedException UserScriptException
      * @expectedExceptionMessage Illegal function 'md5'!
      */
     public function testDenyFunction()
@@ -341,6 +342,5 @@ class BuilderTest extends TestCase
             ]
         ]);
         self::assertEquals("123\nGET\n\n", $result);
-
     }
 }

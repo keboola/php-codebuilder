@@ -1,12 +1,8 @@
 <?php
-/**
- * Created by Ondrej Vana <kachna@keboola.com>
- * Date: 09/12/14
- */
 
 namespace Keboola\Code;
 
-use    Keboola\Code\Exception\UserScriptException;
+use Keboola\Code\Exception\UserScriptException;
 
 class Builder
 {
@@ -29,8 +25,7 @@ class Builder
             "ifempty",
             "implode"
         ]
-    )
-    {
+    ) {
         $this->allovedFns = $allowedFns;
     }
 
@@ -62,6 +57,7 @@ class Builder
      *    From second level onwards the array is flattenned and keys
      *    concatenated by '.' (eg $params['attr']['nested.key'])
      * @return mixed
+     * @throws UserScriptException
      */
     protected function buildFunction($object, array $params = [])
     {
@@ -100,7 +96,9 @@ class Builder
             }
         } elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
             if (!isset($params[key($object)][reset($object)])) {
-                throw new UserScriptException(sprintf("Error evaluating user function - %s '%s' not found!", key($object), reset($object)));
+                throw new UserScriptException(
+                    sprintf("Error evaluating user function - %s '%s' not found!", key($object), reset($object))
+                );
             }
             return $params[key($object)][reset($object)];
         } else {
@@ -112,6 +110,7 @@ class Builder
      * @param string $fn
      * @param array $args
      * @return mixed
+     * @throws \Exception
      */
     protected function customFunction($fn, $args)
     {
