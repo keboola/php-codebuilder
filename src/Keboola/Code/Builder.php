@@ -36,7 +36,7 @@ class Builder
      *    From second level onwards the array is flattenned and keys
      *    concatenated by '.' (eg $params['attr']['nested.key'])
      * @return mixed
-     * @api
+     * @throws UserScriptException
      */
     public function run(\stdClass $object, array $params = [])
     {
@@ -69,38 +69,46 @@ class Builder
             }
 
             return $array;
-        } elseif (!is_object($object)) {
-            return $object;
-        } elseif (property_exists($object, 'function')) {
-            if (!in_array($object->function, $this->allowedFns)) {
-                $func = is_scalar($object->function) ? $object->function : json_encode($object->function);
-                throw new UserScriptException("Illegal function '{$func}'!");
-            }
-
-            $args = [];
-            if (property_exists($object, 'args')) {
-                foreach ($object->args as $k => $v) {
-                    $args[] = $this->buildFunction($v, $params);
+        } elseif (is_object($object)) {
+            if (property_exists($object, 'function')) {
+                // a function object
+                if (!in_array($object->function, $this->allowedFns)) {
+                    $func = is_scalar($object->function) ? $object->function : json_encode($object->function);
+                    throw new UserScriptException("Illegal function '{$func}'!");
                 }
-            }
 
-            try {
-                if (!function_exists($object->function)) {
-                    return $this->customFunction($object->function, $args);
-                } else {
-                    return call_user_func_array($object->function, $args);
+                $args = [];
+                if (property_exists($object, 'args')) {
+                    foreach ($object->args as $k => $v) {
+                        $args[] = $this->buildFunction($v, $params);
+                    }
                 }
-            } catch (\Throwable $e) {
-                throw new UserScriptException($e->getMessage());
+
+                try {
+                    if (!function_exists($object->function)) {
+                        return $this->customFunction($object->function, $args);
+                    } else {
+                        return call_user_func_array($object->function, $args);
+                    }
+                } catch (\Throwable $e) {
+                    throw new UserScriptException($e->getMessage());
+                }
+            } elseif ((count(get_object_vars($object)) == 1) && array_key_exists(key(get_object_vars($object)), $params)) {
+                // reference to function context
+                $prop = key(get_object_vars($object));
+                $value = $object->$prop;
+                if (!isset($params[$prop][$value])) {
+                    throw new UserScriptException(
+                        sprintf("Error evaluating user function - %s '%s' not found!", key($object), reset($object))
+                    );
+                }
+                return $params[key($object)][reset($object)];
+            } else {
+                // invalid object? todo this should probably throw an error
+                return $object;
             }
-        } elseif (count($object) == 1 && array_key_exists(key($object), $params)) {
-            if (!isset($params[key($object)][reset($object)])) {
-                throw new UserScriptException(
-                    sprintf("Error evaluating user function - %s '%s' not found!", key($object), reset($object))
-                );
-            }
-            return $params[key($object)][reset($object)];
         } else {
+            // scalar
             return $object;
         }
     }
