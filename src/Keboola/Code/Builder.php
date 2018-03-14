@@ -99,7 +99,7 @@ class Builder
                 $value = $object->$prop;
                 if (!isset($params[$prop][$value])) {
                     throw new UserScriptException(
-                        sprintf("Error evaluating user function - %s '%s' not found!", key($object), reset($object))
+                        sprintf("Error evaluating user function - %s '%s' not found!", $prop, $value)
                     );
                 }
                 return $params[key($object)][reset($object)];
