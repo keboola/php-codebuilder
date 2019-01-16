@@ -269,8 +269,8 @@ class BuilderTest extends TestCase
                     'attr' => [
                         'c' => "Bat"
                     ],
-                ],
-            ),
+                ]
+            )
         );
     }
 
