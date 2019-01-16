@@ -247,6 +247,33 @@ class BuilderTest extends TestCase
         );
     }
 
+    public function testNestedParams()
+    {
+        $builder = new Builder();
+        $def = '{"my_prop": {
+            "function": "concat",
+            "args": [
+                {"attr": "c"},
+                "man"
+            ]
+        }}';
+
+        $expected = new \stdClass();
+        $expected->my_prop = "Batman";
+
+        self::assertEquals(
+            $expected,
+            $builder->run(
+                json_decode($def),
+                [
+                    'attr' => [
+                        'c' => "Bat"
+                    ],
+                ],
+            ),
+        );
+    }
+
     /**
      * @expectedException \Keboola\Code\Exception\UserScriptException
      * @expectedExceptionMessage Error evaluating user function - attr 'a' not found!

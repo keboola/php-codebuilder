@@ -104,7 +104,10 @@ class Builder
                 }
                 return $params[key($object)][reset($object)];
             } else {
-                // invalid object? todo this should probably throw an error
+                // an object which is not a function, recurse inside to see if there are any functions in it
+                foreach (get_object_vars($object) as $key => $value) {
+                    $object->$key = $this->buildFunction($value, $params);
+                }
                 return $object;
             }
         } else {
