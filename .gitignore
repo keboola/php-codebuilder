@@ -1,5 +1,7 @@
 .git
 .idea
+.phpunit.result.cache
 vendor
 composer.lock
+cc-test-reporter
 /build/logs

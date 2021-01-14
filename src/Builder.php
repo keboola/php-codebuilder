@@ -1,36 +1,34 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\Code;
 
 use Keboola\Code\Exception\UserScriptException;
 
 class Builder
 {
-    /**
-     * @var array
-     */
-    protected $allowedFns;
+    protected array $allowedFns;
 
     public function __construct(
         array $allowedFns = [
-            "md5",
-            "sha1",
-            "time",
-            "date",
-            "strtotime",
-            "base64_encode",
-            "hash_hmac",
-            "sprintf",
-            "concat",
-            "ifempty",
-            "implode"
+            'md5',
+            'sha1',
+            'time',
+            'date',
+            'strtotime',
+            'base64_encode',
+            'hash_hmac',
+            'sprintf',
+            'concat',
+            'ifempty',
+            'implode',
         ]
     ) {
         $this->allowedFns = $allowedFns;
     }
 
     /**
-     * @param \stdClass $object
      * @param array $params Array of arrays!
      *    Accessed as {"attr": "key"} to access $params['attr']['key']
      *    From second level onwards the array is flattenned and keys
@@ -41,9 +39,9 @@ class Builder
     public function run(\stdClass $object, array $params = [])
     {
         // Flatten $params from 2nd level onwards
-        array_walk($params, function (&$value) {
+        array_walk($params, function (&$value): void {
             if (!is_array($value)) {
-                throw new \Exception("The params for code builder must be an array of arrays!");
+                throw new \Exception('The params for code builder must be an array of arrays!');
             }
             $value = \Keboola\Utils\flattenArray($value);
         });
@@ -93,16 +91,20 @@ class Builder
                 } catch (\Throwable $e) {
                     throw new UserScriptException($e->getMessage());
                 }
-            } elseif ((count(get_object_vars($object)) == 1) && array_key_exists(key(get_object_vars($object)), $params)) {
+            } elseif ((count(get_object_vars($object)) === 1) &&
+                array_key_exists(key(get_object_vars($object)), $params)
+            ) {
                 // reference to function context
-                $prop = key(get_object_vars($object));
+                $objectArray = get_object_vars($object);
+                $prop = key($objectArray);
                 $value = $object->$prop;
                 if (!isset($params[$prop][$value])) {
                     throw new UserScriptException(
                         sprintf("Error evaluating user function - %s '%s' not found!", $prop, $value)
                     );
                 }
-                return $params[key($object)][reset($object)];
+
+                return $params[key($objectArray)][reset($objectArray)];
             } else {
                 // an object which is not a function, recurse inside to see if there are any functions in it
                 foreach (get_object_vars($object) as $key => $value) {
@@ -117,12 +119,10 @@ class Builder
     }
 
     /**
-     * @param string $fn
-     * @param array $args
      * @return mixed
      * @throws \Exception
      */
-    protected function customFunction($fn, $args)
+    protected function customFunction(string $fn, array $args)
     {
         if (method_exists($this, $fn)) {
             return $this->{$fn}($args);
@@ -133,17 +133,14 @@ class Builder
 
     /**
      * Concatenate multiple strings into one
-     * @param array $args
-     * @return string
      */
-    protected function concat(array $args)
+    protected function concat(array $args): string
     {
         return implode('', $args);
     }
 
     /**
      * Return first argument if is not empty, otherwise return second argument
-     * @param array $args
      * @return mixed
      * @throws UserScriptException
      */
@@ -156,11 +153,7 @@ class Builder
         return empty($args[0]) ? $args[1] : $args[0];
     }
 
-    /**
-     * @param string $function
-     * @return Builder
-     */
-    public function allowFunction($function)
+    public function allowFunction(string $function): Builder
     {
         if (!in_array($function, $this->allowedFns)) {
             $this->allowedFns[] = $function;
@@ -168,11 +161,7 @@ class Builder
         return $this;
     }
 
-    /**
-     * @param string $function
-     * @return Builder
-     */
-    public function denyFunction($function)
+    public function denyFunction(string $function): Builder
     {
         foreach (array_keys($this->allowedFns, $function) as $key) {
             unset($this->allowedFns[$key]);
