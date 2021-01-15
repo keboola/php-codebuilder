@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\Code\Tests;
 
 use Keboola\Code\Builder;
@@ -8,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 class BuilderTest extends TestCase
 {
-    public function testIfEmpty()
+    public function testIfEmpty(): void
     {
         $now = new \DateTime();
 
@@ -21,7 +23,7 @@ class BuilderTest extends TestCase
         $params = ['time' =>
             [
                 'previousStart' => 0,
-            ]
+            ],
         ];
 
         $definition =
@@ -53,7 +55,7 @@ class BuilderTest extends TestCase
         $params = ['time' =>
             [
                 'previousStart' => $now->getTimestamp(),
-            ]
+            ],
         ];
 
         self::assertEquals(
@@ -89,13 +91,13 @@ class BuilderTest extends TestCase
                 $params
             );
 
-            self::fail("Build of ifempty function should produce error");
+            self::fail('Build of ifempty function should produce error');
         } catch (UserScriptException $e) {
-            self::assertContains('Bad argument count for function \'ifempty\'!', $e->getMessage());
+            self::assertStringContainsString('Bad argument count for function \'ifempty\'!', $e->getMessage());
         }
     }
 
-    public function testInvalidParams()
+    public function testInvalidParams(): void
     {
         $builder = new Builder();
         $definition =
@@ -108,20 +110,20 @@ class BuilderTest extends TestCase
             $builder->run(json_decode($definition));
             self::fail('Invalid parameters must cause exception');
         } catch (UserScriptException $e) {
-            self::assertContains('date() expects at least 1 parameter, 0 given', $e->getMessage());
+            self::assertStringContainsString('date() expects at least 1 parameter, 0 given', $e->getMessage());
         }
     }
 
-    public function testEval()
+    public function testEval(): void
     {
         $builder = new Builder();
         $params = ['attr' =>
             [
-                'apiKey' => "someApiKey",
+                'apiKey' => 'someApiKey',
                 'test' => [
-                    'secret' => "oh I'm Soooo Secret Look at meee"
-                ]
-            ]
+                    'secret' => "oh I'm Soooo Secret Look at meee",
+                ],
+            ],
         ];
 
         // md5(attr[apiKey] . attr[test.secret] . time())
@@ -152,7 +154,7 @@ class BuilderTest extends TestCase
                 json_decode($definition),
                 $params
             ),
-            md5($params['attr']['apiKey'] . $params['attr']['test']['secret'] . time() . "string")
+            md5($params['attr']['apiKey'] . $params['attr']['test']['secret'] . time() . 'string')
         );
 
         $def2 =
@@ -177,7 +179,7 @@ class BuilderTest extends TestCase
                 json_decode($def2),
                 $params
             ),
-            sprintf('%s%s%s%s', $params['attr']['apiKey'], $params['attr']['test']['secret'], time(), "string")
+            sprintf('%s%s%s%s', $params['attr']['apiKey'], $params['attr']['test']['secret'], time(), 'string')
         );
 
         //"%%date(\'Y-m-d+H:i\', strtotime(attr[job.1.success]))%%"
@@ -195,9 +197,9 @@ class BuilderTest extends TestCase
         self::assertEquals(
             $builder->run(
                 json_decode($def3),
-                ['attr' => ['job' => [1 => ['success' => "2014-12-08T10:38:35+01:00"]]]]
+                ['attr' => ['job' => [1 => ['success' => '2014-12-08T10:38:35+01:00']]]]
             ),
-            date('Y-m-d+H:i', strtotime("2014-12-08T10:38:35+01:00"))
+            date('Y-m-d+H:i', strtotime('2014-12-08T10:38:35+01:00'))
         );
 
         self::assertEquals(
@@ -210,11 +212,11 @@ class BuilderTest extends TestCase
                     ]
                 }')
             ),
-            "st.ri.ng"
+            'st.ri.ng'
         );
     }
 
-    public function testParams()
+    public function testParams(): void
     {
         $builder = new Builder();
         $def = '{
@@ -232,22 +234,22 @@ class BuilderTest extends TestCase
                 [
                     'attr' => [
                         'a' => [
-                            'b' => "String"
+                            'b' => 'String',
                         ],
-                        'c' => "Woah"
+                        'c' => 'Woah',
                     ],
                     'param' => [
                         'a' => [
-                            'b' => "Another"
-                        ]
-                    ]
+                            'b' => 'Another',
+                        ],
+                    ],
                 ]
             ),
-            "WoahAnotherString"
+            'WoahAnotherString'
         );
     }
 
-    public function testNestedParams()
+    public function testNestedParams(): void
     {
         $builder = new Builder();
         $def = '{"my_prop": {
@@ -259,7 +261,7 @@ class BuilderTest extends TestCase
         }}';
 
         $expected = new \stdClass();
-        $expected->my_prop = "Batman";
+        $expected->my_prop = 'Batman';
 
         self::assertEquals(
             $expected,
@@ -267,57 +269,51 @@ class BuilderTest extends TestCase
                 json_decode($def),
                 [
                     'attr' => [
-                        'c' => "Bat"
+                        'c' => 'Bat',
                     ],
                 ]
             )
         );
     }
 
-    /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
-     * @expectedExceptionMessage Error evaluating user function - attr 'a' not found!
-     */
-    public function testParamsNotFound()
+    public function testParamsNotFound(): void
     {
         $builder = new Builder();
         $def = '{"attr": "a"}';
 
+        $this->expectException(UserScriptException::class);
+        $this->expectExceptionMessage("Error evaluating user function - attr 'a' not found!");
         $builder->run(json_decode($def), ['attr' => []]);
     }
 
-    /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
-     * @expectedExceptionMessage Error evaluating user function - data 'a' not found!
-     */
-    public function testParamsNotFoundType()
+    public function testParamsNotFoundType(): void
     {
         $builder = new Builder();
         $def = '{"data": "a"}';
 
-        var_dump($builder->run(json_decode($def), ['data' => []]));
+        $this->expectException(UserScriptException::class);
+        $this->expectExceptionMessage("Error evaluating user function - data 'a' not found!");
+        $builder->run(json_decode($def), ['data' => []]);
     }
 
-    /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
-     * @expectedExceptionMessage Illegal function 'var_dump'!
-     */
-    public function testCheckConfigFail()
+    public function testCheckConfigFail(): void
     {
         $builder = new Builder();
+
+        $this->expectException(UserScriptException::class);
+        $this->expectExceptionMessage("Illegal function 'var_dump'!");
         $builder->run(json_decode('{
             "function": "var_dump",
             "args": []
         }'));
     }
 
-    /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
-     * @expectedExceptionMessage Illegal function '{"function":"concat","args":["di","e"]}'!
-     */
-    public function testCheckConfigObfuscate()
+    public function testCheckConfigObfuscate(): void
     {
         $builder = new Builder();
+
+        $this->expectException(UserScriptException::class);
+        $this->expectExceptionMessage('Illegal function \'{"function":"concat","args":["di","e"]}\'!');
         $builder->run(json_decode('{
             "function": {
                 "function": "concat",
@@ -327,7 +323,7 @@ class BuilderTest extends TestCase
         }'));
     }
 
-    public function testAllowFunction()
+    public function testAllowFunction(): void
     {
         $builder = new Builder();
         $builder->allowFunction('gettype')->allowFunction('intval');
@@ -344,21 +340,20 @@ class BuilderTest extends TestCase
         self::assertEquals($val, 'integer');
     }
 
-    /**
-     * @expectedException \Keboola\Code\Exception\UserScriptException
-     * @expectedExceptionMessage Illegal function 'md5'!
-     */
-    public function testDenyFunction()
+    public function testDenyFunction(): void
     {
         $builder = new Builder();
         $builder->denyFunction('md5')->denyFunction('thisDoesntExist');
+
+        $this->expectException(UserScriptException::class);
+        $this->expectExceptionMessage('llegal function \'md5\'!');
         $builder->run(json_decode('{
             "function": "md5",
             "args": ["test"]
         }'));
     }
 
-    public function testArrayArgument()
+    public function testArrayArgument(): void
     {
         $builder = new Builder();
         $def = json_decode('{
@@ -379,11 +374,11 @@ class BuilderTest extends TestCase
 
         $result = $builder->run($def, [
             'authorization' => [
-                'timestamp' => 123
+                'timestamp' => 123,
             ],
             'request' => [
-                'method' => 'GET'
-            ]
+                'method' => 'GET',
+            ],
         ]);
         self::assertEquals("123\nGET\n\n", $result);
     }
