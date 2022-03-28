@@ -116,6 +116,45 @@ class BuilderTest extends TestCase
         }
     }
 
+
+    public function testInvalidParamsType(): void
+    {
+        $builder = new Builder();
+        $builder->allowFunction('urlencode');
+
+        $params = ['attr' =>
+            [
+                'placeholder' => 'value',
+            ],
+        ];
+
+        $definition =
+            '{
+            "function": "md5",
+            "args": [
+                {
+                    "function": "urlencode",
+                    "args": [
+                        {
+                            "attr": {"placeholder": "placeholder"}
+                        }
+                    ]
+                }
+            ]
+        }';
+
+        try {
+            $builder->run(json_decode($definition), $params);
+            self::fail('Invalid parameters must cause exception');
+        } catch (UserScriptException $e) {
+            self::assertStringContainsString(
+                'Error evaluating user function - attr \'{"placeholder":"placeholder"}\' is not a string!',
+                $e->getMessage()
+            );
+        }
+    }
+
+
     public function testEval(): void
     {
         $builder = new Builder();

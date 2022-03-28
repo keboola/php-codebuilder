@@ -105,6 +105,13 @@ class Builder
                 $objectArray = get_object_vars($object);
                 $prop = key($objectArray);
                 $value = $object->$prop;
+                if (is_object($value)) {
+                    throw new UserScriptException(sprintf(
+                            "Error evaluating user function - %s '%s' is not a string!",
+                            $prop,
+                            json_encode($value)
+                    ));
+                }
                 if (!isset($params[$prop][$value])) {
                     throw new UserScriptException(
                         sprintf("Error evaluating user function - %s '%s' not found!", $prop, $value)
