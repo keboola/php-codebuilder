@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace Keboola\Code;
 
+use Exception;
 use Keboola\Code\Exception\UserScriptException;
+use stdClass;
+use Throwable;
+use function Keboola\Utils\flattenArray;
 
 class Builder
 {
+    /**
+     * @var array|string[]
+     */
     protected array $allowedFns;
 
     public function __construct(
@@ -36,14 +43,14 @@ class Builder
      * @return mixed
      * @throws UserScriptException
      */
-    public function run(\stdClass $object, array $params = [])
+    public function run(stdClass $object, array $params = [])
     {
         // Flatten $params from 2nd level onwards
         array_walk($params, function (&$value): void {
             if (!is_array($value)) {
-                throw new \Exception('The params for code builder must be an array of arrays!');
+                throw new Exception('The params for code builder must be an array of arrays!');
             }
-            $value = \Keboola\Utils\flattenArray($value);
+            $value = flattenArray($value);
         });
         return $this->buildFunction($object, $params);
     }
@@ -88,7 +95,7 @@ class Builder
                     } else {
                         return call_user_func_array($object->function, $args);
                     }
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     throw new UserScriptException($e->getMessage());
                 }
             } elseif ((count(get_object_vars($object)) === 1) &&
@@ -127,7 +134,7 @@ class Builder
         if (method_exists($this, $fn)) {
             return $this->{$fn}($args);
         } else {
-            throw new \Exception("Attempted to call undefined method {$fn}.", 500);
+            throw new Exception("Attempted to call undefined method {$fn}.", 500);
         }
     }
 

@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Keboola\Code\Tests;
 
+use DateTime;
 use Keboola\Code\Builder;
 use Keboola\Code\Exception\UserScriptException;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class BuilderTest extends TestCase
 {
     public function testIfEmpty(): void
     {
-        $now = new \DateTime();
+        $now = new DateTime();
 
         $previousMonth = clone $now;
         $previousMonth->modify('-30 days');
@@ -260,7 +262,7 @@ class BuilderTest extends TestCase
             ]
         }}';
 
-        $expected = new \stdClass();
+        $expected = new stdClass();
         $expected->my_prop = 'Batman';
 
         self::assertEquals(
