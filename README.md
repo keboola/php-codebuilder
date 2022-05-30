@@ -54,3 +54,7 @@ The function must be specified in a JSON format, which may contain one of the fo
 
 
 
+
+## License
+
+MIT licensed, see [LICENSE](./LICENSE) file.
