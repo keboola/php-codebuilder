@@ -16,6 +16,7 @@ Execute user scripts defined in a JSON
 - `concat`: Concatenate its arguments into a single string
 - `ifempty`: Return first argument if is not empty, otherwise return second argument
 - `implode`: Concatenate an array from the second argument, using glue string from the first arg
+- `hash`: [See PHP documentation](https://www.php.net/manual/en/function.hash.php)
 
 ## Syntax
 The function must be specified in a JSON format, which may contain one of the following 4 objects:

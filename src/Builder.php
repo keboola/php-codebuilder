@@ -30,6 +30,7 @@ class Builder
             'concat',
             'ifempty',
             'implode',
+            'hash',
         ]
     ) {
         $this->allowedFns = $allowedFns;

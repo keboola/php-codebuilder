@@ -255,6 +255,19 @@ class BuilderTest extends TestCase
             ),
             'st.ri.ng'
         );
+
+        self::assertEquals(
+            '4065014b2e34fdefa987fc4da65b52154d342146575c4df31bdd4ea6961d5cd4',
+            $builder->run(
+                json_decode('{
+                    "function": "hash",
+                    "args": [
+                        "sha256",
+                        "someGreatestTextToHash"
+                    ]
+                }')
+            )
+        );
     }
 
     public function testParams(): void
