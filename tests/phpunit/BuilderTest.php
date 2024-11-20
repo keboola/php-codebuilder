@@ -48,9 +48,9 @@ class BuilderTest extends TestCase
         self::assertEquals(
             $builder->run(
                 json_decode($definition),
-                $params
+                $params,
             ),
-            $previousMonth->getTimestamp()
+            $previousMonth->getTimestamp(),
         );
 
         // first argument
@@ -63,9 +63,9 @@ class BuilderTest extends TestCase
         self::assertEquals(
             $builder->run(
                 json_decode($definition),
-                $params
+                $params,
             ),
-            $now->getTimestamp()
+            $now->getTimestamp(),
         );
 
         // bad argument count
@@ -90,7 +90,7 @@ class BuilderTest extends TestCase
         try {
             $builder->run(
                 json_decode($definition),
-                $params
+                $params,
             );
 
             self::fail('Build of ifempty function should produce error');
@@ -149,7 +149,7 @@ class BuilderTest extends TestCase
         } catch (UserScriptException $e) {
             self::assertStringContainsString(
                 'Error evaluating user function - attr \'{"placeholder":"placeholder"}\' is not a string!',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
     }
@@ -193,9 +193,9 @@ class BuilderTest extends TestCase
         self::assertEquals(
             $builder->run(
                 json_decode($definition),
-                $params
+                $params,
             ),
-            md5($params['attr']['apiKey'] . $params['attr']['test']['secret'] . time() . 'string')
+            md5($params['attr']['apiKey'] . $params['attr']['test']['secret'] . time() . 'string'),
         );
 
         $def2 =
@@ -218,9 +218,9 @@ class BuilderTest extends TestCase
         self::assertEquals(
             $builder->run(
                 json_decode($def2),
-                $params
+                $params,
             ),
-            sprintf('%s%s%s%s', $params['attr']['apiKey'], $params['attr']['test']['secret'], time(), 'string')
+            sprintf('%s%s%s%s', $params['attr']['apiKey'], $params['attr']['test']['secret'], time(), 'string'),
         );
 
         //"%%date(\'Y-m-d+H:i\', strtotime(attr[job.1.success]))%%"
@@ -238,9 +238,9 @@ class BuilderTest extends TestCase
         self::assertEquals(
             $builder->run(
                 json_decode($def3),
-                ['attr' => ['job' => [1 => ['success' => '2014-12-08T10:38:35+01:00']]]]
+                ['attr' => ['job' => [1 => ['success' => '2014-12-08T10:38:35+01:00']]]],
             ),
-            date('Y-m-d+H:i', strtotime('2014-12-08T10:38:35+01:00'))
+            date('Y-m-d+H:i', strtotime('2014-12-08T10:38:35+01:00')),
         );
 
         self::assertEquals(
@@ -251,9 +251,22 @@ class BuilderTest extends TestCase
                         ".",
                         ["st", "ri", "ng"]
                     ]
-                }')
+                }'),
             ),
-            'st.ri.ng'
+            'st.ri.ng',
+        );
+
+        self::assertEquals(
+            '4065014b2e34fdefa987fc4da65b52154d342146575c4df31bdd4ea6961d5cd4',
+            $builder->run(
+                json_decode('{
+                    "function": "hash",
+                    "args": [
+                        "sha256",
+                        "someGreatestTextToHash"
+                    ]
+                }'),
+            ),
         );
     }
 
@@ -284,9 +297,9 @@ class BuilderTest extends TestCase
                             'b' => 'Another',
                         ],
                     ],
-                ]
+                ],
             ),
-            'WoahAnotherString'
+            'WoahAnotherString',
         );
     }
 
@@ -312,8 +325,8 @@ class BuilderTest extends TestCase
                     'attr' => [
                         'c' => 'Bat',
                     ],
-                ]
-            )
+                ],
+            ),
         );
     }
 

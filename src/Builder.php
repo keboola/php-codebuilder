@@ -30,6 +30,7 @@ class Builder
             'concat',
             'ifempty',
             'implode',
+            'hash',
         ]
     ) {
         $this->allowedFns = $allowedFns;
@@ -109,12 +110,12 @@ class Builder
                     throw new UserScriptException(sprintf(
                         "Error evaluating user function - %s '%s' is not a string!",
                         $prop,
-                        json_encode($value)
+                        json_encode($value),
                     ));
                 }
                 if (!isset($params[$prop][$value])) {
                     throw new UserScriptException(
-                        sprintf("Error evaluating user function - %s '%s' not found!", $prop, $value)
+                        sprintf("Error evaluating user function - %s '%s' not found!", $prop, $value),
                     );
                 }
 
